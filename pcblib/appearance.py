@@ -7,6 +7,7 @@ _ui = None
 
 _texWidth = None
 _texHeight = None
+_copperThickness = None
 _texTopColor = None
 _texTopHmap = None
 _texTopMask = None
@@ -76,11 +77,14 @@ class PMCommandCreatedHandler(adsk.core.CommandCreatedEventHandler):
             cmd.isExecutedWhenPreEmpted = False
             inputs = cmd.commandInputs
 
-            global _texHeight, _texWidth, _texTopColor, _texTopHmap, _texTopMask
+            global _texHeight, _texWidth, _copperThickness
+            global _texTopColor, _texTopHmap, _texTopMask
             global _texBottomColor, _texBottomHmap, _texBottomMask, _errMessage
             lengthValue = adsk.core.ValueInput.createByString('0' + defaultUnits)
             _texWidth = inputs.addValueInput('texWidth', 'Width', defaultUnits, lengthValue)
             _texHeight = inputs.addValueInput('texHeight', 'Height', defaultUnits, lengthValue)
+            thicknessValue = adsk.core.ValueInput.createByString('0.05' + defaultUnits)
+            _copperThickness = inputs.addValueInput('copperThickness', 'Copper Thickness', defaultUnits, thicknessValue)
             initText = 'Select a image'
             _texTopColor = inputs.addBoolValueInput('texTopColor', 'Top Color Map', False, )
             _texTopColor.text = initText
@@ -202,23 +206,26 @@ class PMCommandValidateInputsHandler(adsk.core.ValidateInputsEventHandler):
             global _app, _ui
             eventArgs = adsk.core.ValidateInputsEventArgs.cast(args)
 
-            global _texWidth, _texHeight, _errMessage
+            global _texWidth, _texHeight, _copperThickness, _errMessage
             global _texTopColorPath, _texTopHmapPath, _texTopMaskPath
             global _texBottomColorPath, _texBottomHmapPath, _texBottomMaskPath
 
-            _errMessage.text = ''
-            eventArgs.areInputsValid = True
-
             width = getCommandInputValue(_texWidth, 'in')[1]
             height = getCommandInputValue(_texHeight, 'in')[1]
+            thickness = getCommandInputValue(_copperThickness, 'in')[1]
+
+            _errMessage.text = ''
+            eventArgs.areInputsValid = False
 
             if width <= 0 or height <= 0:
                 _errMessage.text = 'Width and Height must be number grater than 0.'
-                eventArgs.areInputsValid = False
+            elif thickness < 0:
+                _errMessage.text = 'Copper thickness must be number grater than 0 or 0.'
             elif _texTopColorPath is None or _texTopHmapPath is None or _texTopMask is None or \
                  _texBottomColorPath is None or _texBottomHmapPath is None or _texBottomMaskPath is None:
                 _errMessage.text = 'All texture map image must be specified.'
-                eventArgs.areInputsValid = False
+            else:
+                eventArgs.areInputsValid = True
 
         except:
             if _ui:
@@ -287,18 +294,19 @@ def generateAppearances():
             except:
                 pass
 
-    global _texWidth, _texHeight
+    global _texWidth, _texHeight, _copperThicknesss
     global _texTopColorPath, _texTopHmapPath, _texTopMaskPath
     global _texBottomColorPath, _texBottomHmapPath, _texBottomMaskPath
     width = getCommandInputValue(_texWidth, 'in')[1]
     height = getCommandInputValue(_texHeight, 'in')[1]
+    thickness = getCommandInputValue(_copperThickness, 'in')[1]
     generateAppearancesForSurface(
-        width, height, 
+        width, height, thickness,
         _texTopColorPath, _texTopHmapPath, _texTopMaskPath,
         'top-', target, matLib
     )
     generateAppearancesForSurface(
-        width, height, 
+        width, height, thickness,
         _texBottomColorPath, _texBottomHmapPath, _texBottomMaskPath,
         'bottom-', target, matLib
     )
@@ -311,7 +319,7 @@ def generateAppearances():
     if bNative == False:
         matLib.unload();
 
-def generateAppearancesForSurface(width, height, base, hmap, mask, prefix, target, matLib):
+def generateAppearancesForSurface(width, height, thickness, base, hmap, mask, prefix, target, matLib):
     # generate base appearance
     org = matLib.appearances.itemByName('pcb-base')
     appear = target.itemByName(prefix + org.name)
@@ -321,7 +329,7 @@ def generateAppearancesForSurface(width, height, base, hmap, mask, prefix, targe
     texture = color.connectedTexture
     updateTexture(texture, width, height, base)
     texture = appear.appearanceProperties.itemById('surface_normal').value
-    updateTexture(texture, width, height, hmap)
+    updateTexture(texture, width, height, hmap, thickness=thickness)
     texture = appear.appearanceProperties.itemById('surface_cutout').value
     updateTexture(texture, width, height, mask)
 
@@ -332,10 +340,8 @@ def generateAppearancesForSurface(width, height, base, hmap, mask, prefix, targe
         appear = target.addByCopy(org, prefix + org.name)
     texture = appear.appearanceProperties.itemById('surface_normal').value
     updateTexture(texture, width, height, hmap)
-    #texture = appear.appearanceProperties.itemById('surface_cutout').value
-    #updateTexture(texture, width, height, mask)
 
-def updateTexture(texture, width, height, path):
+def updateTexture(texture, width, height, path, thickness=None):
     def updateFloatProp(propId, value):
         orgProp = texture.properties.itemById(propId)
         modProp = adsk.core.FloatProperty.cast(orgProp)
@@ -345,4 +351,6 @@ def updateTexture(texture, width, height, path):
     updateFloatProp('texture_RealWorldScaleY', height)
     updateFloatProp('texture_RealWorldOffsetX', -width/2)
     updateFloatProp('texture_RealWorldOffsetY', -height/2)
+    if thickness is not None:
+        updateFloatProp('bumpmap_Depth', thickness)
     texture.changeTextureImage(path)
