@@ -1,0 +1,13 @@
+{
+	"autodeskProduct":	"Fusion360",
+	"type":	"addin",
+	"id":	"a3b7a134-53a3-4fee-bc1c-c82f4c844587",
+	"author":	"Hioroshi Murayama",
+	"description":	{
+		"":	"This add-in helps to create a 3D model from Eagle design due to photo-real-renering."
+	},
+	"version":	"",
+	"runOnStartup":	false,
+	"supportedOS":	"windows|mac",
+	"editEnabled":	true
+}
