@@ -10,12 +10,14 @@ _ui = None
 
 _placeFileButton = None
 _componentsFolder = None
+_containerComponent = None
 _pcbThickness = None
 _errMessage = None
 
 _placeFile = None
 _verifiedFolderPath = ''
 _verifiedFolder = None
+_selectedComponent = None
 
 _handlers = []
 
@@ -57,9 +59,10 @@ class PMCommandCreatedHandler(adsk.core.CommandCreatedEventHandler):
             global _app, _ui
             eventArgs = adsk.core.CommandCreatedEventArgs.cast(args)
 
-            global _verifiedFolder, _verifiedFolderPath
+            global _verifiedFolder, _verifiedFolderPath, _selectedComponent
             _verifiedFolder = None
             _verifiedFolderPath = ''
+            _selectedComponent = None
 
             # Verify that a Fusion design is active.
             des = adsk.fusion.Design.cast(_app.activeProduct)
@@ -74,7 +77,12 @@ class PMCommandCreatedHandler(adsk.core.CommandCreatedEventHandler):
             defaultUnits = des.unitsManager.defaultLengthUnits
             attribs = des.attributes
 
-            global _placeFileButton, _componentsFolder, _pcbThickness, _errMessage
+            global _placeFileButton, _componentsFolder, _containerComponent, _pcbThickness, _errMessage
+            _containerComponent = inputs.addSelectionInput('containerComponent', 'Insert into', 
+                                                           'select component that pcb parts are inserted into')
+            _containerComponent.clearSelectionFilter()
+            _containerComponent.addSelectionFilter('Occurrences')
+            _containerComponent.setSelectionLimits(1)
             _placeFileButton = inputs.addBoolValueInput('placeFileButton', 'Place-info file', False)
             _placeFileButton.text = 'Select a File...'
             _componentsFolder = inputs.addStringValueInput('componentsFolder', 'Components Folder')
@@ -133,7 +141,7 @@ class PMCommandInputChangedHandler(adsk.core.InputChangedEventHandler):
             cmd = eventArgs.inputs.command
             changedInput = eventArgs.input
 
-            global _placeFileButton, _placeFile
+            global _placeFileButton, _placeFile, _containerComponent, _selectedComponent
             if changedInput.id == _placeFileButton.id:
                 fileDialog = _ui.createFileDialog()
                 fileDialog.isMultiSelectEnabled = False
@@ -147,6 +155,15 @@ class PMCommandInputChangedHandler(adsk.core.InputChangedEventHandler):
                 if dialogResult == adsk.core.DialogResults.DialogOK:
                     _placeFile = fileDialog.filename
                     _placeFileButton.text = os.path.basename(_placeFile)
+            elif changedInput.id == _containerComponent.id:
+                if _containerComponent.selectionCount == 0:
+                    _selectedComponent = None
+                else:
+                    entity = _containerComponent.selection(0).entity
+                    if entity.classType() == 'adsk::fusion::Occurrence':
+                        _selectedComponent = entity.component
+                    else:
+                        _selectedComponent = None
 
         except:
             if _ui:
@@ -265,7 +282,11 @@ def placeComponents(file, folder, thickness):
     components = folder.dataFiles
     componentsNum = components.count
     des = adsk.fusion.Design.cast(_app.activeProduct)
-    container = des.rootComponent
+    global _selectedComponent
+    if _selectedComponent:
+        container = _selectedComponent
+    else:
+        container = des.rootComponent
     msg = '{0} : %p % done (%v/%m)'
     finished = []
 
