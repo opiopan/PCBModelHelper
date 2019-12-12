@@ -1,0 +1,20 @@
+if (board) board(B) {
+    // input file name to export place-info to
+    string fileName = dlgFileSave("Save File", filesetext(B.name, ".plinfo"), "*.plinfo");
+    if (fileName == "") exit(0);
+
+    // 
+    output(fileName) {
+        B.elements(E) if (E.populate){
+            printf(
+                "%s %8.4f %8.4f %4.3f %d %s\n",
+                E.name,
+                u2mm(E.x), u2mm(E.y), E.angle, E.mirror,
+                E.package.name
+            );
+        }
+    }
+}else {
+   dlgMessageBox("\n    Execute this ULP in a Board    \n");
+   exit (0);
+}

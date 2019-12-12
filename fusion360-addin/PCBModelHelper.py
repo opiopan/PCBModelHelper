@@ -1,9 +1,10 @@
 #Author-Hioroshi Murayama
-#Description-This add-in helps to create a 3D model from Eagle design due to photo-real-renering.
+#Description-This add-in helps to create a 3D model from Eagle design in order to photo-real-renering.
 
 import adsk.core, adsk.fusion, adsk.cam, traceback, os, sys, importlib
 
-_appearance = None
+appearance = None
+mounter = None
 
 def run(context):
     ui = None
@@ -12,17 +13,15 @@ def run(context):
         ui  = app.userInterface
         
         sys.path.append(os.path.dirname(os.path.realpath(__file__)))
-        from pcblib import appearance
-        importlib.reload(appearance)
-        global _appearance
-        _appearance = appearance
-
-        #with open('/Users/opiopan/Downloads/panels.txt', 'w', encoding='utf-8') as f:
-        #    for panel in ui.allToolbarPanels:
-        #        f.write('{0} : {1}\n'.format(panel.id, panel.name))
+        global appearance, mounter
+        appearance = importlib.import_module("pcblib.appearance")
+        appearance = importlib.reload(appearance)
+        mounter = importlib.import_module("pcblib.mounter")
+        mounter = importlib.reload(mounter)
 
         panel = ui.allToolbarPanels.itemById('UtilityPanel')
-        cmd = _appearance.registerCommand(app, ui, panel)
+        cmd = appearance.registerCommand(app, ui, panel)
+        cmd = mounter.registerCommand(app, ui, panel)
 
     except:
         if ui:
@@ -35,8 +34,10 @@ def stop(context):
         ui  = app.userInterface
 
         panel = ui.allToolbarPanels.itemById('UtilityPanel')
-        if _appearance:
-            _appearance.unregisterCommand(app, ui, panel)
+        if appearance:
+            appearance.unregisterCommand(app, ui, panel)
+        if mounter:
+            mounter.unregisterCommand(app, ui, panel)
 
     except:
         if ui:

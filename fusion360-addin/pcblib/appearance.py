@@ -38,11 +38,11 @@ def registerCommand(app, ui, panel):
         cmdDef = _ui.commandDefinitions.addButtonDefinition(
             CMDID, 
             'Generate PCB appearances', 
-            'Generate appearances for surfaces of PCB',
+            'Generate appearances for surfaces of PCB\n',
             './Resources/PCBAppearances')
 
     # Connect to the command created event.
-    onCommandCreated = PMCommandCreatedHandler()
+    onCommandCreated = PACommandCreatedHandler()
     cmdDef.commandCreated.add(onCommandCreated)
     _handlers.append(onCommandCreated)
 
@@ -58,7 +58,7 @@ def unregisterCommand(app, ui, panel):
     if ctrl:
         ctrl.deleteMe()
 
-class PMCommandCreatedHandler(adsk.core.CommandCreatedEventHandler):
+class PACommandCreatedHandler(adsk.core.CommandCreatedEventHandler):
     def __init__(self):
         super().__init__()
     def notify(self, args):
@@ -105,15 +105,15 @@ class PMCommandCreatedHandler(adsk.core.CommandCreatedEventHandler):
             _bunchTexButton.isFullWidth = True
 
             # Connect to the command related events.
-            onExecute = PMCommandExecuteHandler()
+            onExecute = PACommandExecuteHandler()
             cmd.execute.add(onExecute)
             _handlers.append(onExecute)        
             
-            onInputChanged = PMCommandInputChangedHandler()
+            onInputChanged = PACommandInputChangedHandler()
             cmd.inputChanged.add(onInputChanged)
             _handlers.append(onInputChanged)     
             
-            onValidateInputs = PMCommandValidateInputsHandler()
+            onValidateInputs = PACommandValidateInputsHandler()
             cmd.validateInputs.add(onValidateInputs)
             _handlers.append(onValidateInputs)
 
@@ -121,7 +121,7 @@ class PMCommandCreatedHandler(adsk.core.CommandCreatedEventHandler):
             if _ui:
                 _ui.messageBox('Failed:\n{}'.format(traceback.format_exc()))
 
-class PMCommandExecuteHandler(adsk.core.CommandEventHandler):
+class PACommandExecuteHandler(adsk.core.CommandEventHandler):
     def __init__(self):
         super().__init__()
     def notify(self, args):
@@ -134,7 +134,7 @@ class PMCommandExecuteHandler(adsk.core.CommandEventHandler):
             if _ui:
                 _ui.messageBox('Failed:\n{}'.format(traceback.format_exc()))
 
-class PMCommandInputChangedHandler(adsk.core.InputChangedEventHandler):
+class PACommandInputChangedHandler(adsk.core.InputChangedEventHandler):
     def __init__(self):
         super().__init__()
     def notify(self, args):
@@ -198,7 +198,7 @@ class PMCommandInputChangedHandler(adsk.core.InputChangedEventHandler):
             if _ui:
                 _ui.messageBox('Failed:\n{}'.format(traceback.format_exc()))
 
-class PMCommandValidateInputsHandler(adsk.core.ValidateInputsEventHandler):
+class PACommandValidateInputsHandler(adsk.core.ValidateInputsEventHandler):
     def __init__(self):
         super().__init__()
     def notify(self, args):
