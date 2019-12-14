@@ -6,6 +6,9 @@ import adsk.core, adsk.fusion, adsk.cam, traceback, os, sys, importlib
 appearance = None
 mounter = None
 
+_appearanceCmd = None
+_mounterCmd = None
+
 def run(context):
     ui = None
     try:
@@ -19,9 +22,23 @@ def run(context):
         mounter = importlib.import_module("pcblib.mounter")
         mounter = importlib.reload(mounter)
 
+        global _appearanceCmd, _mounterCmd
+        _appearanceCmd = appearance.registerCommand(app, ui)
+        _mounterCmd = mounter.registerCommand(app, ui)
+
         panel = ui.allToolbarPanels.itemById('UtilityPanel')
-        cmd = appearance.registerCommand(app, ui, panel)
-        cmd = mounter.registerCommand(app, ui, panel)
+        panel.controls.addCommand(_appearanceCmd)
+        panel.controls.addCommand(_mounterCmd)
+
+        for pid in ['SolidModifyPanel', 'SheetMetalModifyPanel',
+                    'SurfaceModifyPanel', 'RenderSetupPanel']:
+            panel = ui.allToolbarPanels.itemById(pid)
+            panel.controls.addCommand(_appearanceCmd, 'AppearanceCommand', False)
+
+        for pid in ['InsertPanel']:
+            panel = ui.allToolbarPanels.itemById(pid)
+            panel.controls.addCommand(_mounterCmd)
+
 
     except:
         if ui:
@@ -33,11 +50,19 @@ def stop(context):
         app = adsk.core.Application.get()
         ui  = app.userInterface
 
-        panel = ui.allToolbarPanels.itemById('UtilityPanel')
+        for pid in ['UtilityPanel', 'SolidModifyPanel', 'SheetMetalModifyPanel',
+                    'SurfaceModifyPanel', 'RenderSetupPanel', 'InsertPanel']:
+            panel = ui.allToolbarPanels.itemById(pid)
+            for cmd in  [_appearanceCmd, _mounterCmd]:
+                if cmd:
+                    ctrl = panel.controls.itemById(cmd.id)
+                    if ctrl:
+                        ctrl.deleteMe()
+
         if appearance:
-            appearance.unregisterCommand(app, ui, panel)
+            appearance.unregisterCommand(app, ui)
         if mounter:
-            mounter.unregisterCommand(app, ui, panel)
+            mounter.unregisterCommand(app, ui)
 
     except:
         if ui:

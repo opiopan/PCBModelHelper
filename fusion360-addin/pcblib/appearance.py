@@ -28,7 +28,7 @@ _lastdir = None
 
 _handlers = []
 
-def registerCommand(app, ui, panel):
+def registerCommand(app, ui):
     global _app, _ui
     _app = app
     _ui  = ui
@@ -46,17 +46,12 @@ def registerCommand(app, ui, panel):
     cmdDef.commandCreated.add(onCommandCreated)
     _handlers.append(onCommandCreated)
 
-    panel.controls.addCommand(cmdDef)
-
     return cmdDef
 
-def unregisterCommand(app, ui, panel):
+def unregisterCommand(app, ui):
     cmdDef = ui.commandDefinitions.itemById(CMDID)
     if cmdDef:
         cmdDef.deleteMe()
-    ctrl = panel.controls.itemById(CMDID)
-    if ctrl:
-        ctrl.deleteMe()
 
 class PACommandCreatedHandler(adsk.core.CommandCreatedEventHandler):
     def __init__(self):
