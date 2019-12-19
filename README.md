@@ -7,8 +7,8 @@ This fucntion is useful to proceed collaborative work between electrical design 
 And Fusion 360 provides photo realistic 3D CG renderer also. This rendering quority is very high enough to use product catolog.
 
 However, in case reding 3D model exported by Eagle, the result is quite dissappoointing finish as below example.<br>
-Since PCB board surface structure is expressed only one decal image, it's exture is flat and matte. We cannot feel metallic luster of pads or  unevenness of circuit pattern from that image.
-in addition, there are many artifact pattern on the board surface, I don't know the reason why.<br>
+Since PCB board surface structure is expressed only one decal image, it's texture is flat and matte. We cannot feel metallic luster of pads or  unevenness of circuit pattern from that image.
+In addition, there are many artifact patterns on the board surface, I don't know the reason why.<br>
 And further more, all components on the board are also matt texture, because 3D model managed in Eagle library is imported as STEP formated data. Even if original 3D model made by Fusion 360 includes specific apearance metadata, such as albedo and/or heigt map, all metadata except color will be dropped when translating to STEP format.<br>
 As a result, rendered image looks like a clay work.
 
@@ -202,7 +202,7 @@ height map for bottom face   | pcb-bottom-hmap.png
 curt map for bottom face     | pcb-bottom-mask.png
 
 Once all information are filled, press ```OK``` button in order to generate appearances.<br>
-Then, execute ```Appearances``` command in ```Modify``` panel, and confirm following four appearance are added in your design.
+Then, execute ```Appearances``` command in ```Modify``` panel, and confirm following four appearances are added in your design.
 
 - top-pcb-base
 - bottom-pcb-base
@@ -216,7 +216,7 @@ Change body visibility that ```base``` is visible and ```metal``` is hidden, the
 </p>
 
 ```metal``` body's appearance is also arranged.<br>
-Change body vivility that ```base``` is hidden and ```metal``` is visible, then apply ```top-pcb-metal``` appearance to top face and ```bottom-pcb-metal``` appearance to bottom face.
+Change body visibility that ```base``` is hidden and ```metal``` is visible, then apply ```top-pcb-metal``` appearance to top face and ```bottom-pcb-metal``` appearance to bottom face.
 
 <p align="center">
     <img alt="step 4-3 of making model" src="https://raw.githubusercontent.com/wiki/opiopan/PCBModelHelper/images/make4-3.jpg" width=700>
