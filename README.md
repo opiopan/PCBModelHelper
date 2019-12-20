@@ -89,6 +89,10 @@ Making PCB 3D model using PCBModelHelper is performed as following five steps.
 4. Appling appearance to board body
 5. Placing device models on board
 
+Tools provided by PCBModelHelkper is used at step 1, step 4 and step 5.<br>
+Step 2 is done by your favorite gerber file imaging tool.<and>
+Stope 4 is done by just pure human operation in Fusion 360, but it is not complex.
+
 ### 1. Exporting information to generate 3D model from Eagle
 Export three kind of data as below from Eagle.
 
@@ -125,7 +129,7 @@ Following three kind of bitmaps are used for both face, top and bottom. That mea
     Created from gerber file of metal layer. <br>
     In order to get better finish of rendering image, I recomend to blur this image a little bit.
 
-- **Cutout map that express region where soler mask does not cover:**<br>
+- **Cutout map that express region where solder mask does not cover:**<br>
     Created from gerber file of solder mask layer.
 
 <p align="center">
@@ -194,10 +198,10 @@ If file name of bitmaps are according to following naming convention, you can sp
 
 Bitmap Kind                  | File Name
 -----------------------------|------------------
-color bitmap for top face    | pcb-top-base.png
+color map for top face       | pcb-top-base.png
 height map for top face      | pcb-top-hmap.png
 cut map for top face         | pcb-top-mask.png
-color bitmap for bottom face | pcb-bottom-base.png
+color map for bottom face    | pcb-bottom-base.png
 height map for bottom face   | pcb-bottom-hmap.png
 curt map for bottom face     | pcb-bottom-mask.png
 
